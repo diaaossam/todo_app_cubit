@@ -6,8 +6,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:todo_app_cubit/models/note_model.dart';
 import 'package:todo_app_cubit/models/user_model.dart';
 import 'package:todo_app_cubit/shared/helper/constants.dart';
+import 'package:todo_app_cubit/shared/helper/methods.dart';
+
+import '../../../shared/local/database_helper.dart';
 
 part 'main_state.dart';
 
@@ -36,31 +40,49 @@ class MainCubit extends Cubit<MainState> {
     return FirebaseAuth.instance.currentUser!.uid;
   }
 
-  /*late Database _database;
-  void createLocalDateBase() async {
-    await openDatabase(
-      ConstantsManger.DATABASE_NAME,
-      version: ConstantsManger.DATABASE_VERSION,
-      onCreate: (Database database, int version) {
-        print('Database is Created');
-        database.execute(ConstantsManger.CREATE_QUERY).then((value) {
-          print('Table Created');
-        });
-      },
-      onOpen: (Database database) {
-        getAllTasks(database: database);
-        print('Database Is Opened');
-      },
-    ).then((value) {
-      _database = value;
-      emit(CreateDatabaseState());
+  List<NoteModel> taskList = [];
+
+  //code
+  void getTaskFromFireStore() {
+    FirebaseFirestore.instance
+        .collection(ConstantsManger.TASKS)
+        .doc(_getCurrentUserUid())
+        .collection(formatDate(DateTime.now()))
+        .snapshots()
+        .listen((event) {
+      taskList.clear();
+      event.docs.forEach((element) {
+        taskList.add(NoteModel.fromJson(element.data()));
+
+      });
+      emit(GetAllDatabaseFirebaseSuccessState());
     });
   }
-  void getAllTasks({required Database database}){
+
+  void deleteTaskFirebase(String uid){
+    FirebaseFirestore.instance
+        .collection(ConstantsManger.TASKS)
+        .doc(_getCurrentUserUid())
+        .collection(formatDate(DateTime.now()));
+  }
+
+
+/*List<NoteModel> listNoteModel = [];
+  void getAllTasksFromDatabase()async{
     emit(GetAllDatabaseLoadingState());
-    database.rawQuery(ConstantsManger.GET_ALL_TASKS).then((value){
-      print('rows: ${value.length} $value');
+    Database? database=  await DatabaseHelper().database;
+    listNoteModel.clear();
+    database!.rawQuery(ConstantsManger.GET_ALL_TASKS).then((value){
+      value.forEach((element) {
+       listNoteModel.add(NoteModel.fromJson(element));
+        print(element);
+      });
+      print(listNoteModel.length);
       emit(GetAllDatabaseSuccessState());
     });
+  }
+
+  void getTodayTasks(){
+
   }*/
 }

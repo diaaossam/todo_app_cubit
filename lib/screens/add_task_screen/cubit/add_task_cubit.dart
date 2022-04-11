@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:todo_app_cubit/models/note_model.dart';
 import 'package:todo_app_cubit/models/reminder_model.dart';
 import 'package:todo_app_cubit/shared/helper/constants.dart';
+import 'package:todo_app_cubit/shared/local/database_helper.dart';
 
 part 'add_task_state.dart';
 
@@ -67,13 +68,20 @@ class AddTaskCubit extends Cubit<AddTaskState> {
         .collection(noteModel.noteDate ?? '')
         .add(noteModel.toMap())
         .then((value) {
-      emit(UploadTaskToFireStoreSucess());
+      FirebaseFirestore.instance
+          .collection(ConstantsManger.TASKS)
+          .doc(getCurrentUserUid())
+          .collection(noteModel.noteDate ?? '').doc(value.id)
+      .update({"id":"${value.id}"}).then((value){
+        emit(UploadTaskToFireStoreSucess());
+      });
+
     }).catchError((error) {
       emit(UploadTaskToFireStoreFailure(error.toString()));
     });
   }
 
-  late Database _database;
+/*  late Database _database;
 
   void createLocalDateBase() async {
     await openDatabase(
@@ -93,23 +101,19 @@ class AddTaskCubit extends Cubit<AddTaskState> {
       _database = value;
       emit(CreateDatabaseState());
     });
-  }
+  }*/
   void insertIntoLocalDateBase({required NoteModel noteModel}) async {
-    await _database.transaction((txn) async{
-      await txn.rawInsert('INSERT INTO ${ConstantsManger.TABLE_NAME} (title,noteDesc,noteDate,startTime,endtime,remind,color) VALUES ("${noteModel.title}", "${noteModel.noteDesc}" ,"${noteModel.noteDate}", "${noteModel.startTime}","${noteModel.endTime}","${noteModel.remind}","${noteModel.color}")').then((value) {
+    Database? _database = await DatabaseHelper().database;
+    await _database!.transaction((txn) async {
+      await txn
+          .rawInsert(
+              'INSERT INTO ${ConstantsManger.TABLE_NAME} (title,noteDesc,noteDate,startTime,endtime,remind,color) VALUES ("${noteModel.title}", "${noteModel.noteDesc}" ,"${noteModel.noteDate}", "${noteModel.startTime}","${noteModel.endTime}","${noteModel.remind}","${noteModel.color}")')
+          .then((value) {
         print("$value inserted successfully");
         emit(InsertDatabaseState());
-        getAllTasks(database: _database);
-      }).catchError((error){
+      }).catchError((error) {
         print('Error Insert ${error.toString()}');
       });
-    });
-  }
-  void getAllTasks({required Database database}){
-    emit(GetAllDatabaseLoadingState());
-    database.rawQuery(ConstantsManger.GET_ALL_TASKS).then((value){
-      print('rows: ${value.length} $value');
-      emit(GetAllDatabaseSuccessState());
     });
   }
 

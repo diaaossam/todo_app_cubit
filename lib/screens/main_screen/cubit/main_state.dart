@@ -4,6 +4,10 @@ part of 'main_cubit.dart';
 abstract class MainState {}
 
 class MainInitial extends MainState {}
+class GetAllDatabaseLoadingState extends MainState {}
+class GetAllDatabaseFirebaseSuccessState extends MainState {}
+
+
 class GetUserLoading extends MainState {}
 class GetUserSucess extends MainState {}
 class GetUserFailed extends MainState {

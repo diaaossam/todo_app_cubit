@@ -12,6 +12,9 @@ class ConstantsManger{
   static const String USERS = 'users';
   static const String DEFULT = 'DEFULT';
   static const String TASKS = 'TASKS';
+  static const String InProgress = 'In Progress';
+  static const String DoneTask = 'Done';
+  static const String Cancel = 'Cancel';
   static const String DEFULT_BIO = 'Hello I`m Using Task App Mangment .. !';
 
   //OnBoardingText

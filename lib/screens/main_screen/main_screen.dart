@@ -4,22 +4,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app_cubit/components/app_text.dart';
 import 'package:todo_app_cubit/components/custom_button.dart';
 import 'package:todo_app_cubit/screens/add_task_screen/add_task_screen.dart';
+import 'package:todo_app_cubit/screens/main_screen/componets/build_no_task.dart';
 import 'package:todo_app_cubit/screens/main_screen/componets/custom_date_picker.dart';
+import 'package:todo_app_cubit/screens/main_screen/componets/task_item_design.dart';
 import 'package:todo_app_cubit/screens/main_screen/cubit/main_cubit.dart';
 import 'package:todo_app_cubit/shared/helper/assets_manger.dart';
 import 'package:todo_app_cubit/shared/helper/constants.dart';
 import 'package:todo_app_cubit/shared/helper/methods.dart';
 import 'package:todo_app_cubit/shared/helper/size_config.dart';
 import 'package:todo_app_cubit/shared/styles/colors.dart';
-
 import '../settings_screen/settings_screen.dart';
-import 'componets/today_tasks.dart';
 
 class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<MainCubit>(
-      create: (context) => MainCubit()..getUserInfo(),
+      create: (context) => MainCubit()
+        ..getUserInfo()
+        ..getTaskFromFireStore(),
       child: BlocConsumer<MainCubit, MainState>(
         listener: (context, state) {},
         builder: (context, state) {
@@ -82,7 +84,23 @@ class MainScreen extends StatelessWidget {
                         ),
                       ),
                       CustomDatePicker(),
-                      SetupTodayTasks( cubit: cubit,),
+                      cubit.taskList.length == 0
+                          ? NoTaskToday()
+                          : Expanded(
+                              child: ListView.separated(
+                                  itemCount: cubit.taskList.length,
+                                  separatorBuilder: (context, index) =>
+                                      Container(
+                                          width: double.infinity,
+                                          height: getProportionateScreenHeight(
+                                              10.0)),
+                                  itemBuilder: (context, index) {
+                                    cubit.taskList.length;
+                                    return TaskItemDesign(
+                                        cubit: cubit,
+                                        noteModel: cubit.taskList[index]);
+                                  }),
+                            ),
                     ],
                   ),
                 );
