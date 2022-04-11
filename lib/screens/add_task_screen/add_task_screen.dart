@@ -8,8 +8,10 @@ import 'package:todo_app_cubit/components/custom_text_form_field.dart';
 import 'package:todo_app_cubit/models/note_model.dart';
 import 'package:todo_app_cubit/screens/add_task_screen/components/toggle_button_design.dart';
 import 'package:todo_app_cubit/screens/add_task_screen/cubit/add_task_cubit.dart';
+import 'package:todo_app_cubit/shared/helper/constants.dart';
 import 'package:todo_app_cubit/shared/helper/methods.dart';
 import 'package:todo_app_cubit/shared/helper/size_config.dart';
+import '../../shared/helper/keyboard.dart';
 import 'components/custom_select_color.dart';
 import 'components/drop_down_reminder_design.dart';
 
@@ -26,9 +28,13 @@ class AddTaskScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AddTaskCubit>(
-      create: (context) => AddTaskCubit()..createLocalDateBase(),
+      create: (context) => AddTaskCubit(),
       child: BlocConsumer<AddTaskCubit, AddTaskState>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          if (state is UploadTaskToFireStoreSucess) {
+            Navigator.pop(context);
+          }
+        },
         builder: (context, state) {
           AddTaskCubit cubit = AddTaskCubit.get(context);
           return Scaffold(
@@ -195,22 +201,25 @@ class AddTaskScreen extends StatelessWidget {
                             if (cubit.storeList[0] == true &&
                                 cubit.storeList[1] == false) // store local
                             {
-                              cubit.insertIntoLocalDateBase(noteModel: NoteModel(
-                                  title: title.text,
-                                  noteDesc: noteDesc.text,
-                                  noteDate: noteDate.text,
-                                  startTime: startTime.text,
-                                  endTime: endTime.text,
-                                  remind: cubit.reminderValue,
-                                  color: cubit.defultSelectedColor));
-                            }
-                            else {
+                              cubit.insertIntoLocalDateBase(
+                                  noteModel: NoteModel(
+                                title: title.text,
+                                noteDesc: noteDesc.text,
+                                noteDate: noteDate.text,
+                                startTime: startTime.text,
+                                endTime: endTime.text,
+                                remind: cubit.reminderValue,
+                                color: cubit.defultSelectedColor,
+                                status: 'new',
+                              ));
+                            } else {
                               cubit.uploadNoteToFireStore(NoteModel(
                                   title: title.text,
                                   noteDesc: noteDesc.text,
                                   noteDate: noteDate.text,
                                   startTime: startTime.text,
                                   endTime: endTime.text,
+                                  status: ConstantsManger.InProgress,
                                   remind: cubit.reminderValue,
                                   color: cubit.defultSelectedColor));
                             }

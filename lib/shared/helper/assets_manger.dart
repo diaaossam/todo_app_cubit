@@ -18,4 +18,5 @@ class AssetsManger{
 
 
   static const String DEFULT_IMAGE = 'assets/images/user.png';
+  static const String EmptyList = 'assets/images/todo.jpg';
 }
